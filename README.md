@@ -6,19 +6,19 @@
 
 <br/>
 
-![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![Vite](https://img.shields.io/badge/Vite-Build-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-Gateway-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![Express](https://img.shields.io/badge/Express-API-000000?style=for-the-badge&logo=express&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![Python](https://img.shields.io/badge/Python-ML%20Engine-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-Inference-009688?style=for-the-badge&logo=fastapi&logoColor=white)
-![Scikit-Learn](https://img.shields.io/badge/Scikit--Learn-RandomForest-F7931E?style=for-the-badge&logo=scikit-learn&logoColor=white)
+![React](https://img.shields.io/static/v1?label=React&message=Frontend&color=61DAFB&style=for-the-badge&logo=react&logoColor=black)
+![Vite](https://img.shields.io/static/v1?label=Vite&message=Build&color=646CFF&style=for-the-badge&logo=vite&logoColor=white)
+![TailwindCSS](https://img.shields.io/static/v1?label=Tailwind&message=CSS&color=38B2AC&style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Node.js](https://img.shields.io/static/v1?label=Node.js&message=Gateway&color=339933&style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/static/v1?label=Express&message=API&color=000000&style=for-the-badge&logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/static/v1?label=MongoDB&message=Database&color=47A248&style=for-the-badge&logo=mongodb&logoColor=white)
+![Python](https://img.shields.io/static/v1?label=Python&message=ML_Engine&color=3776AB&style=for-the-badge&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/static/v1?label=FastAPI&message=Inference&color=009688&style=for-the-badge&logo=fastapi&logoColor=white)
+![Scikit-Learn](https://img.shields.io/static/v1?label=Scikit-Learn&message=RandomForest&color=F7931E&style=for-the-badge&logo=scikit-learn&logoColor=white)
 
-![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
-![Status](https://img.shields.io/badge/Status-Production--Ready-brightgreen?style=flat-square)
-![Contributions](https://img.shields.io/badge/Contributions-Welcome-orange?style=flat-square)
+![License](https://img.shields.io/static/v1?label=License&message=MIT&color=yellow&style=flat-square)
+![Status](https://img.shields.io/static/v1?label=Status&message=Production-Ready&color=brightgreen&style=flat-square)
+![Contributions](https://img.shields.io/static/v1?label=Contributions&message=Welcome&color=orange&style=flat-square)
 
 </div>
 

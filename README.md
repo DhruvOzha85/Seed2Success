@@ -9,7 +9,7 @@
 ![React](https://img.shields.io/badge/React-Frontend-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![Vite](https://img.shields.io/badge/Vite-Build-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-CSS-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white&v=2)
-![Node.js](https://img.shields.io/badge/Node.js-Gateway-339933?style=for-the-badge&logo=nodedotjs&logoColor=white&v=2)
+![Node.js](https://img.shields.io/badge/Node.js-Gateway-339933?style=for-the-badge&logo=nodedotjs&logoColor=white&v=3)
 ![Express](https://img.shields.io/badge/Express-API-000000?style=for-the-badge&logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/MongoDB-Database-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-ML%20Engine-3776AB?style=for-the-badge&logo=python&logoColor=white&v=2)

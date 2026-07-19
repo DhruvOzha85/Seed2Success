@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import axios from "axios";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes/AppRoutes";
 import { regionOptions } from "./data/options";
+import ScrollToTop from "./components/ScrollToTop";
 
 const BASE_URL = import.meta.env.VITE_API_URL || "";
 const API_BASE_URL = `${BASE_URL}/api/recommend-crop`;
@@ -20,11 +21,41 @@ const defaultFormState = {
 };
 
 function App() {
-  // Auth state
   const [token, setToken] = useState(() => localStorage.getItem("seed2success_token"));
   const [user, setUser] = useState(() => {
     try { return JSON.parse(localStorage.getItem("seed2success_user")); } catch { return null; }
   });
+
+  // Setup Axios Interceptor for global auth
+  useEffect(() => {
+    const requestInterceptor = axios.interceptors.request.use(
+      (config) => {
+        if (token && !config.url.includes("open-meteo.com")) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+      },
+      (error) => Promise.reject(error)
+    );
+    
+    const responseInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem("seed2success_token");
+          localStorage.removeItem("seed2success_user");
+          window.location.href = "/";
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    // Clear interceptor on unmount
+    return () => {
+      axios.interceptors.request.eject(requestInterceptor);
+      axios.interceptors.response.eject(responseInterceptor);
+    };
+  }, [token]);
 
   function handleLogin(newToken, newUser) {
     localStorage.setItem("seed2success_token", newToken);
@@ -38,6 +69,11 @@ function App() {
     localStorage.removeItem("seed2success_user");
     setToken(null);
     setUser(null);
+  }
+
+  function handleUpdateUser(updatedUser) {
+    localStorage.setItem("seed2success_user", JSON.stringify(updatedUser));
+    setUser(updatedUser);
   }
 
   const [formState, setFormState] = useState(defaultFormState);
@@ -72,10 +108,29 @@ function App() {
   const [sellingSessions, setSellingSessions] = useState([]);
   const [sellingSidebarOpen, setSellingSidebarOpen] = useState(false);
 
-  // Phase 5 State
-  const [prediction, setPrediction] = useState(null);
-  const [predictionLoading, setPredictionLoading] = useState(false);
-  const [predictionSidebarOpen, setPredictionSidebarOpen] = useState(false);
+
+  // History State
+  const [historySidebarOpen, setHistorySidebarOpen] = useState(false);
+
+  // Profile State
+  const [profileSidebarOpen, setProfileSidebarOpen] = useState(false);
+
+  // Dashboard State
+  const [dashboardSidebarOpen, setDashboardSidebarOpen] = useState(false);
+
+  // Helper to fetch coordinates from district name
+  const fetchCoordinatesForDistrict = async (districtName) => {
+    if (!districtName) return;
+    try {
+      const res = await axios.get(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(districtName)}&count=1&format=json`);
+      if (res.data.results && res.data.results.length > 0) {
+        const { latitude, longitude } = res.data.results[0];
+        setFormState(prev => ({ ...prev, latitude, longitude }));
+      }
+    } catch (err) {
+      console.warn("Geocoding failed for district:", districtName);
+    }
+  };
 
   function updateField(field, value) {
     setFormState((current) => {
@@ -90,7 +145,13 @@ function App() {
         };
       }
       if (field === "state") {
-        return { ...current, state: value, district: (districts[value] || [])[0] || "" };
+        const firstDistrict = (districts[value] || [])[0] || "";
+        fetchCoordinatesForDistrict(firstDistrict);
+        return { ...current, state: value, district: firstDistrict };
+      }
+      if (field === "district") {
+        fetchCoordinatesForDistrict(value);
+        return { ...current, district: value };
       }
       return { ...current, [field]: value };
     });
@@ -103,21 +164,46 @@ function App() {
     setActiveFilter(null);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/farm-input`, formState);
+      const payload = {
+        state: user?.state || formState.state,
+        district: user?.district || formState.district,
+        latitude: user?.latitude || formState.latitude || 28.7041,
+        longitude: user?.longitude || formState.longitude || 77.1025,
+        landArea: 5,
+        budget: 50000,
+        labour: "medium",
+        previousCrop: ""
+      };
+
+      const response = await axios.post(`${API_BASE_URL}/farm-input`, payload, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       const data = response.data;
       setResult(data);
 
       const session = {
         id: Date.now(),
         timestamp: new Date().toLocaleTimeString("en-IN", { hour: "2-digit", minute: "2-digit" }),
-        state: formState.state,
-        district: formState.district,
+        state: payload.state,
+        district: payload.district,
         topCrop: data.top_crops?.[0]?.crop || "N/A",
         score: data.top_crops?.[0]?.suitability_score || 0,
         result: data,
         formState: { ...formState },
       };
       setSessions((prev) => [session, ...prev]);
+
+      try {
+        await axios.post(`${BASE_URL}/api/history`, {
+          type: 'planning',
+          input: payload,
+          result: data
+        });
+      } catch (err) {
+        console.error("Failed to save planning history", err);
+      }
     } catch (error) {
       setErrorMessage(error.response?.data?.error || "Unable to reach the recommendation API. Ensure the backend is running on port 5000.");
     } finally {
@@ -137,40 +223,24 @@ function App() {
     setPhase2Error("");
     setPhase2Result(null);
 
+    const selectedImage = data.files.photos?.leaf || data.files.photos?.field || Object.values(data.files.photos || {}).find(Boolean);
+    if (!selectedImage) {
+      setPhase2Error("Please upload an image to receive AI analysis.");
+      setPhase2Loading(false);
+      return;
+    }
+
     try {
       const formData = new FormData();
       if (data.files.report) formData.append("report", data.files.report);
       Object.keys(data.files.photos || {}).forEach(k => formData.append(`photo_${k}`, data.files.photos[k]));
       formData.append("answers", JSON.stringify(data.answers));
-
-      const selectedImage = data.files.photos?.leaf || data.files.photos?.field || Object.values(data.files.photos || {}).find(Boolean);
-      const healthResponse = await axios.post(`${BASE_URL}/api/crop-health/analyze`, formData);
-      let diseaseResponse = null;
-
-      if (selectedImage) {
-        const diseaseFormData = new FormData();
-        diseaseFormData.append("image", selectedImage);
-        try {
-          diseaseResponse = await axios.post(`${BASE_URL}/api/detect-disease`, diseaseFormData);
-        } catch (_error) {
-          diseaseResponse = {
-            data: {
-              plant: "Unavailable",
-              health_status: "Unavailable",
-              disease_name: null,
-              confidence: 0,
-              vision_labels: [],
-              treatment: "Image disease detection is unavailable until the backend API keys are configured.",
-              warning: "Plant.id or Google Vision is not configured on the backend.",
-            },
-          };
-        }
-      }
-
-      const mergedResult = {
-        ...healthResponse.data,
-        diseaseDetection: diseaseResponse?.data || null,
-      };
+      formData.append("latitude", formState.latitude || 28.7041);
+      formData.append("longitude", formState.longitude || 77.1025);
+      const healthResponse = await axios.post(`${BASE_URL}/api/crop-health/analyze`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const mergedResult = healthResponse.data;
       setPhase2Result(mergedResult);
 
       const session = {
@@ -197,13 +267,19 @@ function App() {
     setHarvestError("");
     setHarvestResult(null);
 
+
+
     try {
       const formData = new FormData();
-      if (data.files.report) formData.append("report", data.files.report);
-      Object.keys(data.files.photos || {}).forEach((key) => formData.append(`photo_${key}`, data.files.photos[key]));
-      formData.append("answers", JSON.stringify(data.answers));
 
-      const response = await axios.post(`${BASE_URL}/api/harvest/analyze`, formData);
+
+      formData.append("answers", JSON.stringify(data.answers));
+      formData.append("latitude", formState.latitude || 28.7041);
+      formData.append("longitude", formState.longitude || 77.1025);
+
+      const response = await axios.post(`${BASE_URL}/api/harvest/analyze`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setHarvestResult(response.data);
 
       const session = {
@@ -232,10 +308,16 @@ function App() {
 
     try {
       const formData = new FormData();
-      Object.keys(data.files.photos || {}).forEach((key) => formData.append(`photo_${key}`, data.files.photos[key]));
-      formData.append("answers", JSON.stringify(data.answers));
 
-      const response = await axios.post(`${BASE_URL}/api/selling/analyze`, formData);
+      formData.append("answers", JSON.stringify(data.answers));
+      formData.append("latitude", formState.latitude || 28.7041);
+      formData.append("longitude", formState.longitude || 77.1025);
+      formData.append("state", user?.state || formState.state || "Andhra Pradesh");
+      formData.append("district", user?.district || formState.district || "Guntur");
+
+      const response = await axios.post(`${BASE_URL}/api/selling/analyze`, formData, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setSellingResult(response.data);
 
       const session = {
@@ -258,21 +340,6 @@ function App() {
     setSellingSidebarOpen(false);
   }
 
-  async function handleRunPrediction(params) {
-    if (!params) {
-      setPrediction(null);
-      return;
-    }
-    setPredictionLoading(true);
-    try {
-      const response = await axios.post(`${BASE_URL}/api/crop-prediction`, params);
-      setPrediction(response.data);
-    } catch (error) {
-      console.error("Prediction failed", error);
-    } finally {
-      setPredictionLoading(false);
-    }
-  }
 
   const propsObject = {
     planning: {
@@ -283,30 +350,46 @@ function App() {
     health: {
       sessions: phase2Sessions, onSelectSession: handleSelectPhase2Session, sidebarOpen: phase2SidebarOpen,
       onToggleSidebar: () => setPhase2SidebarOpen(!phase2SidebarOpen), onSubmit: handlePhase2Submit,
-      loading: phase2Loading, errorMessage: phase2Error, result: phase2Result
+      loading: phase2Loading, errorMessage: phase2Error, result: phase2Result,
+      onReset: () => setPhase2Result(null)
     },
     harvesting: {
       sessions: harvestSessions, onSelectSession: handleSelectHarvestSession, sidebarOpen: harvestSidebarOpen,
       onToggleSidebar: () => setHarvestSidebarOpen(!harvestSidebarOpen), onSubmit: handleHarvestSubmit,
-      loading: harvestLoading, errorMessage: harvestError, result: harvestResult
+      loading: harvestLoading, errorMessage: harvestError, result: harvestResult,
+      onReset: () => setHarvestResult(null)
     },
     selling: {
       sessions: sellingSessions, onSelectSession: handleSelectSellingSession, sidebarOpen: sellingSidebarOpen,
       onToggleSidebar: () => setSellingSidebarOpen(!sellingSidebarOpen), onSubmit: handleSellingSubmit,
-      loading: sellingLoading, errorMessage: sellingError, result: sellingResult
+      loading: sellingLoading, errorMessage: sellingError, result: sellingResult,
+      onReset: () => setSellingResult(null)
     },
     schemes: {},
     subscription: {
       sidebarOpen: sellingSidebarOpen, onToggleSidebar: () => setSellingSidebarOpen(!sellingSidebarOpen)
     },
-    prediction: {
-      sidebarOpen: predictionSidebarOpen, onToggleSidebar: () => setPredictionSidebarOpen(!predictionSidebarOpen),
-      prediction, loading: predictionLoading, onRunPrediction: handleRunPrediction
+    history: {
+      sidebarOpen: historySidebarOpen, onToggleSidebar: () => setHistorySidebarOpen(!historySidebarOpen)
+    },
+    profile: {
+      sidebarOpen: profileSidebarOpen, onToggleSidebar: () => setProfileSidebarOpen(!profileSidebarOpen),
+      onUpdateUser: handleUpdateUser
+    },
+    dashboard: {
+      sidebarOpen: dashboardSidebarOpen, onToggleSidebar: () => setDashboardSidebarOpen(!dashboardSidebarOpen)
+    },
+    about: {
+      sidebarOpen: dashboardSidebarOpen, onToggleSidebar: () => setDashboardSidebarOpen(!dashboardSidebarOpen)
+    },
+    contact: {
+      sidebarOpen: dashboardSidebarOpen, onToggleSidebar: () => setDashboardSidebarOpen(!dashboardSidebarOpen)
     }
   };
 
   return (
     <BrowserRouter>
+      <ScrollToTop />
       <AppRoutes 
         token={token} 
         user={user} 

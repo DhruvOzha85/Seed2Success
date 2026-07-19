@@ -67,7 +67,6 @@ const cropSchema = new mongoose.Schema({
 
   season: {
     type: String,
-    enum: ["Kharif", "Rabi", "Zaid", "Perennial"],
     required: true
   },
 

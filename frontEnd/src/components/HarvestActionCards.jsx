@@ -115,16 +115,6 @@ function HarvestActionCards({ result }) {
           </div>
         </CardShell>
 
-        <CardShell icon={<IndianRupee size={20} className="text-brand-700" />} title="Harvest Cost Estimate" subtitle="Expected harvesting spend" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
-          <div className="bg-white/70 rounded-xl p-3 border border-brand-100">
-            <InfoRow label="Labour" value={formatCurrency(harvestCostEstimate?.labourCost)} />
-            <InfoRow label="Operations" value={formatCurrency(harvestCostEstimate?.operationsCost)} />
-            <InfoRow label="Transport" value={formatCurrency(harvestCostEstimate?.transportCost)} />
-            <InfoRow label="Storage prep" value={formatCurrency(harvestCostEstimate?.storagePreparationCost)} />
-            <InfoRow label="Total" value={formatCurrency(harvestCostEstimate?.totalCost)} valueClassName="font-bold text-brand-900" />
-          </div>
-          <p className="text-[13px] text-brand-900 mt-4">{harvestCostEstimate?.note}</p>
-        </CardShell>
 
         <CardShell icon={<PackageCheck size={20} className="text-brand-700" />} title="Post-Harvest Care" subtitle="Loss prevention after cutting" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
           <div className="space-y-2">

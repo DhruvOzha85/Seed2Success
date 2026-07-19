@@ -14,9 +14,9 @@ function formatCurrency(value) {
 function WeatherCard({ weather }) {
   if (!weather) return null;
   const metrics = [
-    { icon: <Thermometer size={20} />, value: `${weather.temperature}°C`, label: "Temperature", color: "text-amber-500", bg: "bg-amber-50" },
-    { icon: <CloudRain size={20} />, value: `${weather.precipitation} mm`, label: "Rainfall (24h)", color: "text-blue-500", bg: "bg-blue-50" },
-    { icon: <Droplets size={20} />, value: `${weather.humidity}%`, label: "Humidity", color: "text-cyan-500", bg: "bg-cyan-50" },
+    { icon: <Thermometer size={20} />, value: `${Number(weather.temperature).toFixed(3)}°C`, label: "Temperature", color: "text-amber-500", bg: "bg-amber-50" },
+    { icon: <CloudRain size={20} />, value: `${Number(weather.precipitation).toFixed(3)} mm`, label: "Rainfall (24h)", color: "text-blue-500", bg: "bg-blue-50" },
+    { icon: <Droplets size={20} />, value: `${Number(weather.humidity).toFixed(3)}%`, label: "Humidity", color: "text-cyan-500", bg: "bg-cyan-50" },
   ];
 
   return (
@@ -192,6 +192,26 @@ function CropCard({ crop, rank }) {
           ))}
         </div>
 
+        {/* Dynamic ML Features */}
+        {crop.dynamic_soil && (
+          <div className="flex flex-wrap gap-1.5 mb-4">
+            {[
+              { icon: <Leaf size={11} />, text: `pH: ${crop.dynamic_soil.ph}` },
+              { icon: <Leaf size={11} />, text: `N: ${crop.dynamic_soil.nitrogen}g/kg` },
+              { icon: <Leaf size={11} />, text: `SOC: ${crop.dynamic_soil.soc}g/kg` },
+              { icon: <Leaf size={11} />, text: `Clay: ${crop.dynamic_soil.clay}%` },
+              { icon: <Leaf size={11} />, text: `Sand: ${crop.dynamic_soil.sand}%` },
+              { icon: <Leaf size={11} />, text: `Silt: ${crop.dynamic_soil.silt}%` },
+              { icon: <Leaf size={11} />, text: `CEC: ${crop.dynamic_soil.cec}cmol/kg` },
+              { icon: <Leaf size={11} />, text: `Bulk Density: ${crop.dynamic_soil.bulk_density}cg/cm³` },
+            ].map((pill, i) => (
+              <span key={`soil-${i}`} className="inline-flex items-center gap-1 text-[11px] text-brand-700 bg-brand-50 border border-brand-200 px-2.5 py-1 rounded-full font-medium">
+                {pill.icon} {pill.text}
+              </span>
+            ))}
+          </div>
+        )}
+
         {/* Expand / Collapse */}
         <button
           onClick={() => setExpanded(!expanded)}
@@ -284,10 +304,9 @@ function RecommendationCards({ result, activeFilter, onFilterChange }) {
         <div className="w-16 h-16 rounded-2xl bg-brand-50 flex items-center justify-center mx-auto mb-5">
           <Leaf size={28} className="text-brand-400" />
         </div>
-        <h2 className="font-display font-bold text-xl text-gray-800 mb-2">Your recommendations will appear here</h2>
+        <h2 className="font-display font-bold text-xl text-gray-800 mb-2">Generating your recommendations...</h2>
         <p className="text-sm text-gray-400 max-w-md mx-auto leading-relaxed">
-          Fill in your farm details above and click <strong className="text-brand-600">"Generate Crop Recommendations"</strong> to
-          get AI-powered crop suggestions based on live weather, budget analysis, and market trends.
+          Please wait while our AI analyzes live weather, soil data, and agronomic features for your location.
         </p>
       </section>
     );

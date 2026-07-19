@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Menu, X, Clock, Activity, LoaderCircle, LogOut } from "lucide-react";
+import { Menu, X, Clock, Activity, LoaderCircle, LogOut, Calculator } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PhaseNavigation from "../components/PhaseNavigation";
 import LanguageSelector from "../components/LanguageSelector";
-import HarvestPhotoUploader from "../components/HarvestPhotoUploader";
+
 import HarvestGuidedQuestions from "../components/HarvestGuidedQuestions";
 import HarvestActionCards from "../components/HarvestActionCards";
 
@@ -19,9 +19,10 @@ function HarvestInterface({
   result,
   user,
   onLogout,
+  onReset,
 }) {
   const { t } = useTranslation();
-  const [files, setFiles] = useState({ photos: {}, report: null });
+
   const [answers, setAnswers] = useState({
     maturityStage: "Nearly ready",
     cropType: "",
@@ -34,16 +35,27 @@ function HarvestInterface({
     weatherConcerns: ["No weather concerns"],
   });
 
-  const handleFileChange = (type, value) => {
-    setFiles((prev) => ({ ...prev, [type]: value }));
-  };
+  const [validationErrors, setValidationErrors] = useState({});
 
   const handleAnswerChange = (field, value) => {
     setAnswers((prev) => ({ ...prev, [field]: value }));
+    if (validationErrors[field]) {
+      setValidationErrors((prev) => ({ ...prev, [field]: false }));
+    }
   };
 
   const handleSubmit = () => {
-    onSubmit({ files, answers });
+    const errors = {};
+    if (!answers.cropType || !answers.cropType.trim()) errors.cropType = true;
+    if (!answers.landSize) errors.landSize = true;
+    if (answers.labourAvailable === "yes" && !answers.workersAvailable) errors.workersAvailable = true;
+
+    if (Object.keys(errors).length > 0) {
+      setValidationErrors(errors);
+      return;
+    }
+    setValidationErrors({});
+    onSubmit({ answers });
   };
 
   return (
@@ -169,12 +181,25 @@ function HarvestInterface({
 
           {!loading && !result ? (
             <>
-              <HarvestPhotoUploader files={files} onFileChange={handleFileChange} />
-              <HarvestGuidedQuestions answers={answers} onAnswerChange={handleAnswerChange} />
+              <HarvestGuidedQuestions answers={answers} onAnswerChange={handleAnswerChange} validationErrors={validationErrors} />
             </>
           ) : null}
 
-          {!loading && result ? <HarvestActionCards result={result} /> : null}
+          {!loading && result ? (
+            <div className="space-y-6">
+              <HarvestActionCards result={result} />
+              <div className="flex justify-center mt-8 mb-4">
+                <button
+                  onClick={onReset}
+                  className="group relative inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-brand-600 to-brand-500 text-white font-semibold text-[14px] shadow-lg shadow-brand-500/30 hover:shadow-xl hover:shadow-brand-500/40 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out skew-x-12"></div>
+                  <Calculator size={18} className="relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="relative z-10 tracking-wide">Calculate Another Plan</span>
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </main>
     </div>

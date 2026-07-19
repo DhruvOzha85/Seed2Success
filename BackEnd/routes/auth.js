@@ -1,87 +1,51 @@
 const express = require("express");
 const crypto = require("crypto");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const rateLimit = require("express-rate-limit");
 const User = require("../Modules/user");
 
-let bcrypt = null;
-let jwt = null;
-
-try {
-  bcrypt = require("bcryptjs");
-} catch (_error) {
-  bcrypt = null;
-}
-
-try {
-  jwt = require("jsonwebtoken");
-} catch (_error) {
-  jwt = null;
-}
-
 const router = express.Router();
+
+// Security: Auth Rate Limiting (Prevents brute-force)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 5, // Limit each IP to 5 requests per windowMs for auth routes
+  message: { error: "Too many login attempts from this IP, please try again after 15 minutes." },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
 
 const JWT_SECRET = process.env.JWT_SECRET || "seed2success_jwt_fallback_secret";
 const JWT_EXPIRES_IN = "7d";
 
-function base64Url(input) {
-  return Buffer.from(input).toString("base64url");
-}
-
-function fallbackHash(password, salt) {
-  return crypto
-    .pbkdf2Sync(password, salt, 100000, 64, "sha512")
-    .toString("hex");
-}
-
 async function hashPassword(password) {
-  if (bcrypt) {
-    const salt = await bcrypt.genSalt(10);
-    return bcrypt.hash(password, salt);
-  }
-
-  const salt = crypto.randomBytes(16).toString("hex");
-  const hash = fallbackHash(password, salt);
-  return `pbkdf2$${salt}$${hash}`;
+  // Use 12 rounds for enterprise-grade security
+  const salt = await bcrypt.genSalt(12);
+  return bcrypt.hash(password, salt);
 }
 
 async function comparePassword(password, storedPassword) {
-  if (bcrypt && !String(storedPassword).startsWith("pbkdf2$")) {
-    return bcrypt.compare(password, storedPassword);
+  // Backward compatibility for users who registered before the bcrypt migration
+  if (String(storedPassword).startsWith("pbkdf2$")) {
+    const [scheme, salt, storedHash] = String(storedPassword).split("$");
+    const computedHash = crypto.pbkdf2Sync(password, salt, 100000, 64, "sha512").toString("hex");
+    return crypto.timingSafeEqual(Buffer.from(computedHash, "hex"), Buffer.from(storedHash, "hex"));
   }
-
-  const [scheme, salt, storedHash] = String(storedPassword).split("$");
-
-  if (scheme !== "pbkdf2" || !salt || !storedHash) {
-    return false;
-  }
-
-  const computedHash = fallbackHash(password, salt);
-  return crypto.timingSafeEqual(
-    Buffer.from(computedHash, "hex"),
-    Buffer.from(storedHash, "hex")
-  );
+  
+  // Use strictly bcrypt for comparison
+  return bcrypt.compare(password, storedPassword);
 }
 
 function signToken(payload) {
-  if (jwt) {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
-  }
-
-  const header = base64Url(JSON.stringify({ alg: "HS256", typ: "JWT" }));
-  const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60;
-  const body = base64Url(JSON.stringify({ ...payload, exp }));
-  const signature = crypto
-    .createHmac("sha256", JWT_SECRET)
-    .update(`${header}.${body}`)
-    .digest("base64url");
-
-  return `${header}.${body}.${signature}`;
+  return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
 }
 
 /**
  * POST /auth/register
  * Create a new user account.
  */
-router.post("/register", async (req, res) => {
+router.post("/register", authLimiter, async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
@@ -119,6 +83,11 @@ router.post("/register", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        state: user.state,
+        district: user.district,
+        locationName: user.locationName,
+        latitude: user.latitude,
+        longitude: user.longitude
       },
     });
   } catch (error) {
@@ -131,7 +100,7 @@ router.post("/register", async (req, res) => {
  * POST /auth/login
  * Authenticate an existing user.
  */
-router.post("/login", async (req, res) => {
+router.post("/login", authLimiter, async (req, res) => {
   try {
     const { email, password } = req.body;
 
@@ -161,6 +130,11 @@ router.post("/login", async (req, res) => {
         id: user._id,
         name: user.name,
         email: user.email,
+        state: user.state,
+        district: user.district,
+        locationName: user.locationName,
+        latitude: user.latitude,
+        longitude: user.longitude
       },
     });
   } catch (error) {

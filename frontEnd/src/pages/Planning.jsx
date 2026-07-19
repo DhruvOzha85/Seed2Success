@@ -2,10 +2,9 @@ import {
   Sprout, Bot, LoaderCircle, Menu, X, Clock, ChevronRight, Zap, CloudSun, BarChart3, RefreshCw, Shield, LogOut
 } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import InputBox from "../components/InputBox";
 import RecommendationCards from "../components/RecommendationCards";
 import PhaseNavigation from "../components/PhaseNavigation";
-import { useState } from "react";
+import { useEffect, useRef } from "react";
 import LanguageSelector from "../components/LanguageSelector";
 
 function ChatInterface({
@@ -15,6 +14,16 @@ function ChatInterface({
   user, onLogout,
 }) {
   const { t } = useTranslation();
+
+  const hasAutoFetched = useRef(false);
+
+  // Auto-fetch recommendations on mount if we haven't already
+  useEffect(() => {
+    if (!result && !loading && !errorMessage && onSubmit && !hasAutoFetched.current) {
+      hasAutoFetched.current = true;
+      onSubmit();
+    }
+  }, [result, loading, errorMessage, onSubmit]);
 
   return (
     <div className="flex min-h-screen">
@@ -74,48 +83,7 @@ function ChatInterface({
 
         </div>
 
-        {/* Session History */}
-        <div className="flex-1 px-4 pb-2">
-          <div className="flex items-center gap-2 px-2 mb-3 mt-2">
-            <Clock size={13} className="text-brand-500" />
-            <span className="text-[11px] font-semibold uppercase tracking-widest text-brand-500">{t("planning.recentPlans")}</span>
-          </div>
 
-          {sessions.length === 0 ? (
-            <div className="px-3 py-4 text-center">
-              <p className="text-[12px] text-brand-600">{t("planning.noSessions")}</p>
-              <p className="text-[11px] text-brand-700 mt-1">{t("planning.noSessionsDesc")}</p>
-            </div>
-          ) : (
-            <div className="space-y-1.5">
-              {sessions.map((session) => (
-                <button
-                  key={session.id}
-                  onClick={() => onSelectSession(session)}
-                  className="w-full text-left px-3 py-3 rounded-xl hover:bg-white/[0.06] transition-all group border border-transparent hover:border-brand-800"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="min-w-0">
-                      <p className="text-[13px] font-medium text-brand-200 truncate">
-                        {session.district}, {session.state}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[11px] text-brand-400">{session.topCrop}</span>
-                        <span className="text-[11px] px-1.5 py-0.5 rounded-full bg-brand-500/15 text-brand-400 font-medium">
-                          {session.score}/100
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <span className="text-[10px] text-brand-500">{session.timestamp}</span>
-                      <ChevronRight size={14} className="text-brand-600" />
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
 
         {/* Sidebar Footer */}
         <div className="p-4 border-t border-brand-900/40">
@@ -173,8 +141,8 @@ function ChatInterface({
                 transition-all duration-200"
             >
               {loading ? <LoaderCircle size={16} className="spinner" /> : <Bot size={16} />}
-              <span className="hidden sm:inline">{loading ? t("planning.analyzingBtn") : t("planning.generateBtn")}</span>
-              <span className="sm:hidden">{loading ? "..." : t("planning.analyzeBtn")}</span>
+              <span className="hidden sm:inline">{loading ? t("planning.analyzingBtn") : "Refresh Predictions"}</span>
+              <span className="sm:hidden">{loading ? "..." : "Refresh"}</span>
             </button>
           </div>
         </div>
@@ -194,10 +162,7 @@ function ChatInterface({
             </div>
           )}
 
-          {/* Input Form */}
-          {!loading && (
-            <InputBox formState={formState} districts={districts} onFieldChange={onFieldChange} />
-          )}
+
 
           {/* Error */}
           {errorMessage && (

@@ -1,0 +1,287 @@
+{
+    "Crop Production": {
+        "rows": 246091,
+        "columns": [
+            "state_name",
+            "district_name",
+            "crop_year",
+            "season",
+            "crop",
+            "area_",
+            "production_"
+        ],
+        "dtypes": {
+            "state_name": "str",
+            "district_name": "str",
+            "crop_year": "int64",
+            "season": "str",
+            "crop": "str",
+            "area_": "float64",
+            "production_": "float64"
+        },
+        "missing": {
+            "state_name": 0,
+            "district_name": 0,
+            "crop_year": 0,
+            "season": 0,
+            "crop": 0,
+            "area_": 0,
+            "production_": 3730
+        },
+        "duplicates": 0,
+        "outliers": {
+            "crop_year": 0,
+            "area_": 40705,
+            "production_": 42390
+        },
+        "summary": {
+            "crop_year": {
+                "min": 1997.0,
+                "max": 2015.0,
+                "mean": 2005.6430182330926
+            },
+            "area_": {
+                "min": 0.04,
+                "max": 8580100.0,
+                "mean": 12002.82086370489
+            },
+            "production_": {
+                "min": 0.0,
+                "max": 1250800000.0,
+                "mean": 582503.442250981
+            }
+        }
+    },
+    "SoilGrids": {
+        "rows": 101,
+        "columns": [
+            "state",
+            "district",
+            "latitude",
+            "longitude",
+            "ph_h2o_0_5cm",
+            "nitrogen_g_per_kg_0_5cm",
+            "soc_g_per_kg_0_5cm",
+            "clay_pct_0_5cm",
+            "sand_pct_0_5cm",
+            "silt_pct_0_5cm",
+            "cec_mmol_kg_0_5cm",
+            "bulk_density_kg_per_dm3_0_5cm",
+            "available_p_kg_per_ha",
+            "available_k_kg_per_ha"
+        ],
+        "dtypes": {
+            "state": "str",
+            "district": "str",
+            "latitude": "float64",
+            "longitude": "float64",
+            "ph_h2o_0_5cm": "float64",
+            "nitrogen_g_per_kg_0_5cm": "float64",
+            "soc_g_per_kg_0_5cm": "float64",
+            "clay_pct_0_5cm": "float64",
+            "sand_pct_0_5cm": "float64",
+            "silt_pct_0_5cm": "float64",
+            "cec_mmol_kg_0_5cm": "float64",
+            "bulk_density_kg_per_dm3_0_5cm": "float64",
+            "available_p_kg_per_ha": "float64",
+            "available_k_kg_per_ha": "float64"
+        },
+        "missing": {
+            "state": 0,
+            "district": 0,
+            "latitude": 0,
+            "longitude": 0,
+            "ph_h2o_0_5cm": 1,
+            "nitrogen_g_per_kg_0_5cm": 1,
+            "soc_g_per_kg_0_5cm": 0,
+            "clay_pct_0_5cm": 1,
+            "sand_pct_0_5cm": 1,
+            "silt_pct_0_5cm": 1,
+            "cec_mmol_kg_0_5cm": 1,
+            "bulk_density_kg_per_dm3_0_5cm": 0,
+            "available_p_kg_per_ha": 101,
+            "available_k_kg_per_ha": 101
+        },
+        "duplicates": 0,
+        "outliers": {
+            "latitude": 0,
+            "longitude": 4,
+            "ph_h2o_0_5cm": 6,
+            "nitrogen_g_per_kg_0_5cm": 7,
+            "soc_g_per_kg_0_5cm": 5,
+            "clay_pct_0_5cm": 1,
+            "sand_pct_0_5cm": 3,
+            "silt_pct_0_5cm": 3,
+            "cec_mmol_kg_0_5cm": 3,
+            "bulk_density_kg_per_dm3_0_5cm": 0,
+            "available_p_kg_per_ha": 0,
+            "available_k_kg_per_ha": 0
+        },
+        "summary": {
+            "latitude": {
+                "min": 8.5241,
+                "max": 31.634,
+                "mean": 21.560148514851484
+            },
+            "longitude": {
+                "min": 70.4579,
+                "max": 94.912,
+                "mean": 79.52123366336633
+            },
+            "ph_h2o_0_5cm": {
+                "min": 5.314,
+                "max": 8.363,
+                "mean": 6.997139999999998
+            },
+            "nitrogen_g_per_kg_0_5cm": {
+                "min": 0.651,
+                "max": 3.978,
+                "mean": 1.6466199999999998
+            },
+            "soc_g_per_kg_0_5cm": {
+                "min": 6.438,
+                "max": 55.056,
+                "mean": 19.86311881188119
+            },
+            "clay_pct_0_5cm": {
+                "min": 19.051,
+                "max": 51.854,
+                "mean": 31.631849999999996
+            },
+            "sand_pct_0_5cm": {
+                "min": 8.632,
+                "max": 56.441,
+                "mean": 34.517830000000004
+            },
+            "silt_pct_0_5cm": {
+                "min": 19.007,
+                "max": 58.81,
+                "mean": 33.884879999999995
+            },
+            "cec_mmol_kg_0_5cm": {
+                "min": 10.662,
+                "max": 51.063,
+                "mean": 24.93465
+            },
+            "bulk_density_kg_per_dm3_0_5cm": {
+                "min": 1.155,
+                "max": 1.704,
+                "mean": 1.4262178217821782
+            },
+            "available_p_kg_per_ha": {
+                "min": NaN,
+                "max": NaN,
+                "mean": NaN
+            },
+            "available_k_kg_per_ha": {
+                "min": NaN,
+                "max": NaN,
+                "mean": NaN
+            }
+        }
+    },
+    "NASA Weather": {
+        "rows": 700839,
+        "columns": [
+            "state",
+            "district",
+            "latitude",
+            "longitude",
+            "date",
+            "temperature_2m_mean",
+            "temperature_2m_max",
+            "temperature_2m_min",
+            "relative_humidity_2m_mean",
+            "precipitation_sum",
+            "shortwave_radiation_sum",
+            "wind_speed_2m_mean"
+        ],
+        "dtypes": {
+            "state": "str",
+            "district": "str",
+            "latitude": "float64",
+            "longitude": "float64",
+            "date": "str",
+            "temperature_2m_mean": "float64",
+            "temperature_2m_max": "float64",
+            "temperature_2m_min": "float64",
+            "relative_humidity_2m_mean": "float64",
+            "precipitation_sum": "float64",
+            "shortwave_radiation_sum": "float64",
+            "wind_speed_2m_mean": "float64"
+        },
+        "missing": {
+            "state": 0,
+            "district": 0,
+            "latitude": 0,
+            "longitude": 0,
+            "date": 0,
+            "temperature_2m_mean": 0,
+            "temperature_2m_max": 0,
+            "temperature_2m_min": 0,
+            "relative_humidity_2m_mean": 0,
+            "precipitation_sum": 0,
+            "shortwave_radiation_sum": 0,
+            "wind_speed_2m_mean": 0
+        },
+        "duplicates": 0,
+        "outliers": {
+            "latitude": 0,
+            "longitude": 27756,
+            "temperature_2m_mean": 8088,
+            "temperature_2m_max": 974,
+            "temperature_2m_min": 1069,
+            "relative_humidity_2m_mean": 0,
+            "precipitation_sum": 113877,
+            "shortwave_radiation_sum": 4164,
+            "wind_speed_2m_mean": 24534
+        },
+        "summary": {
+            "latitude": {
+                "min": 8.5241,
+                "max": 31.634,
+                "mean": 21.560148514851488
+            },
+            "longitude": {
+                "min": 70.4579,
+                "max": 94.912,
+                "mean": 79.52123366336633
+            },
+            "temperature_2m_mean": {
+                "min": 6.3,
+                "max": 42.74,
+                "mean": 26.008529219977767
+            },
+            "temperature_2m_max": {
+                "min": 11.4,
+                "max": 50.43,
+                "mean": 32.51103179189514
+            },
+            "temperature_2m_min": {
+                "min": -1.64,
+                "max": 36.41,
+                "mean": 20.494500634239817
+            },
+            "relative_humidity_2m_mean": {
+                "min": 4.0,
+                "max": 96.46,
+                "mean": 58.434711367375385
+            },
+            "precipitation_sum": {
+                "min": 0.0,
+                "max": 294.12,
+                "mean": 2.8972068192552065
+            },
+            "shortwave_radiation_sum": {
+                "min": 1.05,
+                "max": 31.69,
+                "mean": 18.557852088710817
+            },
+            "wind_speed_2m_mean": {
+                "min": 0.2,
+                "max": 12.78,
+                "mean": 2.214365424869335
+            }
+        }
+    }
+}

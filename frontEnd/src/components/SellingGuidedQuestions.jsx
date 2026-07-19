@@ -30,7 +30,7 @@ function mapDefectLevel(label) {
   return "medium";
 }
 
-function SellingGuidedQuestions({ answers, onAnswerChange }) {
+function SellingGuidedQuestions({ answers, onAnswerChange, validationErrors = {} }) {
   return (
     <section className="bg-white/80 backdrop-blur border border-brand-200/70 rounded-3xl p-5 sm:p-6 shadow-sm">
       <div className="mb-5">
@@ -103,7 +103,7 @@ function SellingGuidedQuestions({ answers, onAnswerChange }) {
               type="text"
               value={answers.cropType || ""}
               onChange={(event) => onAnswerChange("cropType", event.target.value)}
-              className="mt-2 w-full px-4 py-3 text-[13px] rounded-xl border border-brand-200 bg-white shadow-sm focus:ring-2 focus:ring-brand-300 outline-none"
+              className={`mt-2 w-full px-4 py-3 text-[13px] rounded-xl border bg-white shadow-sm outline-none transition-colors ${validationErrors.cropType ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-200 focus:ring-2 focus:ring-brand-300'}`}
               placeholder="e.g. Paddy, Tomato, Onion"
             />
           </label>

@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Menu, X, Clock, Activity, LoaderCircle, LogOut } from "lucide-react";
+import { Menu, X, Clock, Activity, LoaderCircle, LogOut, ImagePlus } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import PhaseNavigation from "../components/PhaseNavigation";
 import LanguageSelector from "../components/LanguageSelector";
-import GuidedQuestions from "../components/GuidedQuestions";
 import ActionCardsPhase2 from "../components/ActionCardsPhase2";
 import PhotoUploader from "../components/PhotoUploader";
 
@@ -19,6 +18,7 @@ function CropHealthInterface({
   result,
   user,
   onLogout,
+  onReset,
 }) {
   const { t } = useTranslation();
   const [answers, setAnswers] = useState({});
@@ -164,11 +164,24 @@ function CropHealthInterface({
           {!loading && !result ? (
             <>
               <PhotoUploader files={files} onFileChange={handleFileChange} singleImage />
-              <GuidedQuestions answers={answers} onAnswerChange={handleAnswerChange} />
             </>
           ) : null}
 
-          {!loading && result ? <ActionCardsPhase2 result={result} /> : null}
+          {!loading && result ? (
+            <div className="space-y-6">
+              <ActionCardsPhase2 result={result} />
+              <div className="flex justify-center mt-8 mb-4">
+                <button
+                  onClick={onReset}
+                  className="group relative inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold text-[14px] shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 ease-out skew-x-12"></div>
+                  <ImagePlus size={18} className="relative z-10 group-hover:scale-110 transition-transform duration-300" />
+                  <span className="relative z-10 tracking-wide">Upload Another Image</span>
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       </main>
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useId, useMemo, useState } from "react";
 import { Crosshair, MapPinned, Search } from "lucide-react";
+import axios from "axios";
 
 const DEFAULT_CENTER = { lat: 20.5937, lng: 78.9629 };
 
@@ -36,7 +37,7 @@ function GoogleMapLocationPicker({ value, onLocationSelect }) {
     [searchText, value?.latitude, value?.longitude]
   );
 
-  const handleSearchSubmit = (event) => {
+  const handleSearchSubmit = async (event) => {
     event.preventDefault();
 
     const trimmed = searchText.trim();
@@ -45,16 +46,41 @@ function GoogleMapLocationPicker({ value, onLocationSelect }) {
       return;
     }
 
-    onLocationSelect({
-      address: trimmed,
-      latitude: null,
-      longitude: null,
-      placeName: trimmed,
-      state: "",
-      district: "",
-    });
-
-    setStatus("Map updated. Confirm state and district using the dropdowns below.");
+    try {
+      const res = await axios.get(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(trimmed)}&count=1&format=json`);
+      if (res.data.results && res.data.results.length > 0) {
+        const { latitude, longitude, name, admin1, admin2 } = res.data.results[0];
+        onLocationSelect({
+          address: name,
+          latitude,
+          longitude,
+          placeName: name,
+          state: admin1 || "",
+          district: admin2 || admin1 || "",
+        });
+        setStatus(`Map updated to ${name}.`);
+      } else {
+        onLocationSelect({
+          address: trimmed,
+          latitude: null,
+          longitude: null,
+          placeName: trimmed,
+          state: "",
+          district: "",
+        });
+        setStatus("Location not found precisely. Confirm state and district using the dropdowns below.");
+      }
+    } catch (error) {
+      onLocationSelect({
+        address: trimmed,
+        latitude: null,
+        longitude: null,
+        placeName: trimmed,
+        state: "",
+        district: "",
+      });
+      setStatus("Search failed. Confirm state and district using the dropdowns below.");
+    }
   };
 
   const handleUseCurrentLocation = () => {

@@ -15,7 +15,7 @@ function ToggleButton({ active, children, onClick, activeClass, idleClass = "bor
   );
 }
 
-function HarvestGuidedQuestions({ answers, onAnswerChange }) {
+function HarvestGuidedQuestions({ answers, onAnswerChange, validationErrors = {} }) {
   const toggleWeatherConcern = (option) => {
     const current = [...(answers.weatherConcerns || [])];
     const hasOption = current.includes(option);
@@ -88,11 +88,11 @@ function HarvestGuidedQuestions({ answers, onAnswerChange }) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label className="block">
                 <span className="text-[12px] font-semibold text-gray-600">Number of workers</span>
-                <input type="number" min="0" value={answers.workersAvailable || ""} onChange={(event) => onAnswerChange("workersAvailable", event.target.value)} className="mt-2 w-full px-4 py-3 text-[13px] rounded-xl border border-brand-200 bg-white shadow-sm focus:ring-2 focus:ring-brand-400 outline-none" placeholder="e.g. 8" />
+                <input type="number" min="0" value={answers.workersAvailable || ""} onChange={(event) => onAnswerChange("workersAvailable", event.target.value)} className={`mt-2 w-full px-4 py-3 text-[13px] rounded-xl border bg-white shadow-sm outline-none transition-colors ${validationErrors.workersAvailable ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-200 focus:ring-2 focus:ring-brand-400'}`} placeholder="e.g. 8" />
               </label>
               <label className="block">
                 <span className="text-[12px] font-semibold text-gray-600">Land size (acres)</span>
-                <input type="number" min="0.5" step="0.5" value={answers.landSize || ""} onChange={(event) => onAnswerChange("landSize", event.target.value)} className="mt-2 w-full px-4 py-3 text-[13px] rounded-xl border border-brand-200 bg-white shadow-sm focus:ring-2 focus:ring-brand-400 outline-none" placeholder="e.g. 5" />
+                <input type="number" min="0.5" step="0.5" value={answers.landSize || ""} onChange={(event) => onAnswerChange("landSize", event.target.value)} className={`mt-2 w-full px-4 py-3 text-[13px] rounded-xl border bg-white shadow-sm outline-none transition-colors ${validationErrors.landSize ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-200 focus:ring-2 focus:ring-brand-400'}`} placeholder="e.g. 5" />
               </label>
             </div>
           </div>
@@ -105,7 +105,7 @@ function HarvestGuidedQuestions({ answers, onAnswerChange }) {
             <p className="text-[12px] text-gray-500 mb-4">Provide the crop name so estimates can be tuned more closely.</p>
             <label className="block">
               <span className="text-[12px] font-semibold text-gray-600">Crop type</span>
-              <input type="text" value={answers.cropType || ""} onChange={(event) => onAnswerChange("cropType", event.target.value)} className="mt-2 w-full px-4 py-3 text-[13px] rounded-xl border border-brand-200 bg-white shadow-sm focus:ring-2 focus:ring-brand-300 outline-none" placeholder="e.g. Paddy, Wheat, Cotton" />
+              <input type="text" value={answers.cropType || ""} onChange={(event) => onAnswerChange("cropType", event.target.value)} className={`mt-2 w-full px-4 py-3 text-[13px] rounded-xl border bg-white shadow-sm outline-none transition-colors ${validationErrors.cropType ? 'border-red-500 ring-1 ring-red-500' : 'border-brand-200 focus:ring-2 focus:ring-brand-300'}`} placeholder="e.g. Paddy, Wheat, Cotton" />
             </label>
           </div>
         </div>

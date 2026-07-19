@@ -95,7 +95,26 @@ function SellingCards({ result }) {
         </CardShell>
 
         <CardShell icon={<ChartColumn size={20} className="text-brand-700" />} title="Historical Price Context" subtitle={historicalPriceContext?.trend} className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
-          <p className="text-[13px] text-brand-950">{historicalPriceContext?.note}</p>
+          <p className="text-[13px] text-brand-950 mb-4">{historicalPriceContext?.note}</p>
+          {historicalPriceContext?.dataPoints && historicalPriceContext.dataPoints.length > 0 && (
+            <div className="flex items-end gap-2 h-24 mt-2">
+              {historicalPriceContext.dataPoints.map((val, i) => {
+                const maxVal = Math.max(...historicalPriceContext.dataPoints);
+                const heightPercent = Math.max((val / maxVal) * 100, 10); // at least 10% height
+                return (
+                  <div key={i} className="flex-1 bg-brand-100/50 rounded-t-md relative group h-full flex items-end">
+                    <div 
+                      className="w-full bg-gradient-to-t from-brand-600 to-brand-400 rounded-t-md transition-all duration-700 ease-out"
+                      style={{ height: `${heightPercent}%` }}
+                    ></div>
+                    <div className="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-900 text-white text-[11px] font-medium py-1 px-2 rounded pointer-events-none transition-opacity z-10 whitespace-nowrap shadow-md">
+                      {formatCurrency(val)}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </CardShell>
 
         <CardShell icon={<CircleDollarSign size={20} className="text-brand-700" />} title="Cost and Margin View" subtitle="Selling scenario view" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
@@ -114,43 +133,49 @@ function SellingCards({ result }) {
           <p className="text-[13px] text-brand-900">{sellNowVsStore?.rationale}</p>
         </CardShell>
 
-        <CardShell icon={<Store size={20} className="text-brand-700" />} title="Storage Partner Options" subtitle="Platform utility panel" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
-          <div className="space-y-3">
-            {(storagePartnerOptions?.options || []).map((option) => (
-              <div key={option.name} className="bg-white/70 rounded-xl p-3 border border-brand-100">
-                <p className="text-[13px] font-bold text-brand-950">{option.name}</p>
-                <p className="text-[12px] text-brand-900 mt-1">Capacity: {option.capacity}</p>
-                <p className="text-[12px] text-brand-900">Cost: {option.cost}</p>
-                <p className="text-[12px] text-brand-900">Distance: {option.distance}</p>
-              </div>
-            ))}
-          </div>
-        </CardShell>
+        {storagePartnerOptions && storagePartnerOptions.options && storagePartnerOptions.options.length > 0 && (
+          <CardShell icon={<Store size={20} className="text-brand-700" />} title="Storage Partner Options" subtitle="Platform utility panel" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
+            <div className="space-y-3">
+              {(storagePartnerOptions.options || []).map((option) => (
+                <div key={option.name} className="bg-white/70 rounded-xl p-3 border border-brand-100">
+                  <p className="text-[13px] font-bold text-brand-950">{option.name}</p>
+                  <p className="text-[12px] text-brand-900 mt-1">Capacity: {option.capacity}</p>
+                  <p className="text-[12px] text-brand-900">Cost: {option.cost}</p>
+                  <p className="text-[12px] text-brand-900">Distance: {option.distance}</p>
+                </div>
+              ))}
+            </div>
+          </CardShell>
+        )}
 
-        <CardShell icon={<Truck size={20} className="text-brand-700" />} title="Transport Options" subtitle="Platform utility panel" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
-          <div className="space-y-3">
-            {(transportOptions?.options || []).map((option) => (
-              <div key={option.route} className="bg-white/70 rounded-xl p-3 border border-brand-100">
-                <p className="text-[13px] font-bold text-brand-950">{option.route}</p>
-                <p className="text-[12px] text-brand-900 mt-1">{option.vehicle} • {option.eta}</p>
-                <p className="text-[12px] text-brand-900">Estimated cost: {option.cost}</p>
-                <p className="text-[12px] text-brand-900">{option.note}</p>
-              </div>
-            ))}
-          </div>
-        </CardShell>
+        {transportOptions && transportOptions.options && transportOptions.options.length > 0 && (
+          <CardShell icon={<Truck size={20} className="text-brand-700" />} title="Transport Options" subtitle="Platform utility panel" className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
+            <div className="space-y-3">
+              {(transportOptions.options || []).map((option) => (
+                <div key={option.route} className="bg-white/70 rounded-xl p-3 border border-brand-100">
+                  <p className="text-[13px] font-bold text-brand-950">{option.route}</p>
+                  <p className="text-[12px] text-brand-900 mt-1">{option.vehicle} • {option.eta}</p>
+                  <p className="text-[12px] text-brand-900">Estimated cost: {option.cost}</p>
+                  <p className="text-[12px] text-brand-900">{option.note}</p>
+                </div>
+              ))}
+            </div>
+          </CardShell>
+        )}
 
-        <CardShell icon={<MapPinned size={20} className="text-brand-700" />} title="Buyer and Contractor Visibility" subtitle={buyerVisibility?.preferredChannel} className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
-          <div className="space-y-3">
-            {(buyerVisibility?.buyers || []).map((buyer) => (
-              <div key={buyer.name} className="bg-white/70 rounded-xl p-3 border border-brand-100">
-                <p className="text-[13px] font-bold text-brand-950">{buyer.name}</p>
-                <p className="text-[12px] text-brand-900 mt-1">{buyer.channel} • {buyer.priceRange}</p>
-                <p className="text-[12px] text-brand-900">{buyer.note}</p>
-              </div>
-            ))}
-          </div>
-        </CardShell>
+        {buyerVisibility && buyerVisibility.buyers && buyerVisibility.buyers.length > 0 && (
+          <CardShell icon={<MapPinned size={20} className="text-brand-700" />} title="Buyer and Contractor Visibility" subtitle={buyerVisibility.preferredChannel} className="bg-gradient-to-br from-brand-50 to-white border-brand-200/70">
+            <div className="space-y-3">
+              {(buyerVisibility.buyers || []).map((buyer) => (
+                <div key={buyer.name} className="bg-white/70 rounded-xl p-3 border border-brand-100">
+                  <p className="text-[13px] font-bold text-brand-950">{buyer.name}</p>
+                  <p className="text-[12px] text-brand-900 mt-1">{buyer.channel} • {buyer.priceRange}</p>
+                  <p className="text-[12px] text-brand-900">{buyer.note}</p>
+                </div>
+              ))}
+            </div>
+          </CardShell>
+        )}
       </div>
     </div>
   );

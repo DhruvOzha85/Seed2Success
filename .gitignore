@@ -1,4 +1,103 @@
-node_modules
-.env.local
-frontEnd/.env.local
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
 package-lock.json
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+env/
+.venv/
+Pipfile.lock
+
+# Environment Variables (Secrets!)
+.env
+.env.*
+!.env.example
+
+# Large Data & Datasets
+data/
+dataset/
+Plant_leaf_diseases_dataset_without_augmentation/
+*.csv
+*.tsv
+*.tif
+*.tiff
+*.jsonl
+
+# Machine Learning Models
+models/
+*.pkl
+*.h5
+*.model
+*.joblib
+catboost_info/
+mlruns/
+
+# Databases
+*.sqlite
+*.sqlite3
+*.db
+s2s_platform.db
+
+# Temporary / Scratch Files
+scratch/
+temp/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Build Outputs (Vite/React/Python)
+dist/
+build/
+frontEnd/dist/
+frontEnd/build/
+.nyc_output/
+coverage/
+
+# OS & IDE Files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+.eslintcache
+.pnp.*
+
+# Python Specifics
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+.pytest_cache/
+.coverage
+htmlcov/
+venv/
+.venv/
+Pipfile.lock

@@ -1,22 +1,46 @@
-import { useTranslation } from "react-i18next";
 import { Globe, ChevronDown } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 
 const LANGUAGES = [
-  { code: "en", label: "English", native: "English" },
-  { code: "hi", label: "Hindi", native: "हिन्दी" },
-  { code: "te", label: "Telugu", native: "తెలుగు" },
-  { code: "mr", label: "Marathi", native: "मराठी" },
-  { code: "ta", label: "Tamil", native: "தமிழ்" },
-  { code: "kn", label: "Kannada", native: "ಕನ್ನಡ" },
+  { code: "en", label: "English", native: "English", gtCode: "en" },
+  { code: "hi", label: "Hindi", native: "हिन्दी", gtCode: "hi" },
+  { code: "te", label: "Telugu", native: "తెలుగు", gtCode: "te" },
+  { code: "mr", label: "Marathi", native: "मराठी", gtCode: "mr" },
+  { code: "ta", label: "Tamil", native: "தமிழ்", gtCode: "ta" },
+  { code: "kn", label: "Kannada", native: "ಕನ್ನಡ", gtCode: "kn" },
 ];
 
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+  return null;
+}
+
+function setLanguageCookie(gtCode) {
+  const cookieValue = `/en/${gtCode}`;
+  document.cookie = `googtrans=${cookieValue}; path=/;`;
+  // Set for the domain as well to ensure it works properly
+  const domain = window.location.hostname;
+  document.cookie = `googtrans=${cookieValue}; path=/; domain=${domain};`;
+}
+
 function LanguageSelector() {
-  const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [currentLang, setCurrentLang] = useState(LANGUAGES[0]);
   const ref = useRef(null);
 
-  const current = LANGUAGES.find((l) => l.code === i18n.language) || LANGUAGES[0];
+  useEffect(() => {
+    const cookie = getCookie('googtrans');
+    if (cookie) {
+      const parts = cookie.split('/');
+      if (parts.length === 3) {
+        const langCode = parts[2];
+        const match = LANGUAGES.find(l => l.gtCode === langCode);
+        if (match) setCurrentLang(match);
+      }
+    }
+  }, []);
 
   // Close on outside click
   useEffect(() => {
@@ -27,6 +51,11 @@ function LanguageSelector() {
     return () => document.removeEventListener("mousedown", handleClick);
   }, []);
 
+  const changeLanguage = (lang) => {
+    setLanguageCookie(lang.gtCode);
+    window.location.reload();
+  };
+
   return (
     <div ref={ref} className="relative px-2 mb-3">
       <button
@@ -35,8 +64,8 @@ function LanguageSelector() {
       >
         <Globe size={14} className="text-brand-400 group-hover:text-brand-300 transition-colors" />
         <div className="flex-1 text-left min-w-0">
-          <p className="text-[12px] font-medium text-brand-200 leading-tight truncate">{current.native}</p>
-          <p className="text-[10px] text-brand-500 leading-tight">{current.label}</p>
+          <p className="text-[12px] font-medium text-brand-200 leading-tight truncate">{currentLang.native}</p>
+          <p className="text-[10px] text-brand-500 leading-tight">{currentLang.label}</p>
         </div>
         <ChevronDown size={13} className={`text-brand-500 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
       </button>
@@ -46,9 +75,9 @@ function LanguageSelector() {
           {LANGUAGES.map((lang) => (
             <button
               key={lang.code}
-              onClick={() => { i18n.changeLanguage(lang.code); setOpen(false); }}
+              onClick={() => changeLanguage(lang)}
               className={`w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors ${
-                lang.code === i18n.language
+                lang.code === currentLang.code
                   ? "bg-brand-600/20 text-brand-200"
                   : "text-brand-300 hover:bg-white/[0.05] hover:text-brand-100"
               }`}
@@ -59,6 +88,9 @@ function LanguageSelector() {
           ))}
         </div>
       )}
+      
+      {/* Hidden container for google translate widget */}
+      <div id="google_translate_element" className="hidden"></div>
     </div>
   );
 }

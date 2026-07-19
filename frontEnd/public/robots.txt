@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://seed2success.example.com/sitemap.xml

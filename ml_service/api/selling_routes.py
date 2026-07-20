@@ -21,17 +21,36 @@ if os.path.exists(MODEL_PATH):
 
 @router.post("/predict", response_model=SellingResponse)
 async def predict_selling_price(request: SellingRequest):
-    if not engine:
-        raise HTTPException(status_code=503, detail="Selling model is not available.")
-    
-    price_per_quintal = engine.predict(
-        state=request.state,
-        district=request.district,
-        crop_type=request.cropType,
-        selling_urgency=request.sellingUrgency,
-        quality_signal=request.qualitySignal,
-        defect_level=request.defectLevel
-    )
+    if engine:
+        price_per_quintal = engine.predict(
+            state=request.state,
+            district=request.district,
+            crop_type=request.cropType,
+            selling_urgency=request.sellingUrgency,
+            quality_signal=request.qualitySignal,
+            defect_level=request.defectLevel
+        )
+    else:
+        # Heuristic Fallback
+        base_price = 2000.0
+        
+        # Adjust for quality
+        if request.qualitySignal.lower() == "grade a":
+            base_price *= 1.2
+        elif request.qualitySignal.lower() == "grade c":
+            base_price *= 0.8
+            
+        # Adjust for defect level
+        if request.defectLevel.lower() == "high":
+            base_price *= 0.7
+        elif request.defectLevel.lower() == "low":
+            base_price *= 0.95
+            
+        # Adjust for urgency
+        if request.sellingUrgency.lower() == "rush":
+            base_price *= 0.85
+            
+        price_per_quintal = base_price
     
     # Calculate total revenue
     qty_multiplier = 1.0

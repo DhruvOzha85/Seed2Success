@@ -9,7 +9,7 @@ from core.config import settings
 logger = logging.getLogger("vision_api")
 router = APIRouter()
 
-OLLAMA_URL = "http://localhost:11434/api/generate"
+OLLAMA_URL = "http://localhost:11434/v1/chat/completions" # Ollama's OpenAI compatible endpoint
 OLLAMA_MODEL = "llava"
 
 @router.post("/analyze")
@@ -84,18 +84,30 @@ async def analyze_vision(
         else:
             raise HTTPException(status_code=400, detail="Invalid task_type.")
 
-        # Send to Ollama
+        # Send to LM Studio (OpenAI Compatible API)
+        content_array = [
+            {"type": "text", "text": prompt + f"\nContext: {json.dumps(context_data)}"}
+        ]
+        
+        if base64_image:
+            content_array.append({
+                "type": "image_url",
+                "image_url": {
+                    "url": f"data:image/jpeg;base64,{base64_image}"
+                }
+            })
+
         payload = {
             "model": OLLAMA_MODEL,
-            "prompt": prompt + f"\nContext: {json.dumps(context_data)}",
-            "format": "json",
-            "stream": False,
-            "options": {
-                "temperature": 0.1
-            }
+            "messages": [
+                {
+                    "role": "user",
+                    "content": content_array
+                }
+            ],
+            "temperature": 0.1,
+            "stream": False
         }
-        if base64_image:
-            payload["images"] = [base64_image]
         
         try:
             logger.info(f"Sending image to local Ollama ({OLLAMA_MODEL})...")
@@ -103,7 +115,7 @@ async def analyze_vision(
             response.raise_for_status()
             
             response_data = response.json()
-            response_text = response_data.get("response", "").strip()
+            response_text = response_data["choices"][0]["message"]["content"].strip()
             
             # Clean markdown if present
             if response_text.startswith("```json"):
@@ -114,7 +126,49 @@ async def analyze_vision(
             return json.loads(response_text)
             
         except Exception as e:
-            logger.warning(f"Ollama Vision API failed: {e}. Ensure Ollama is running and model '{OLLAMA_MODEL}' is downloaded. Using fallback.")
+            logger.warning(f"Ollama API failed: {e}. Ensure Ollama is running and the model '{OLLAMA_MODEL}' is pulled. Trying Gemini Fallback.")
+            try:
+                if not settings.GEMINI_API_KEY:
+                    raise Exception("No Gemini API Key provided in settings")
+                
+                logger.info("Sending image to Google Gemini (gemini-2.5-flash)...")
+                gemini_url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
+                
+                gemini_payload = {
+                    "contents": [{
+                        "parts": [
+                            {"text": prompt + f"\nContext: {json.dumps(context_data)}"}
+                        ]
+                    }],
+                    "generationConfig": {
+                        "temperature": 0.1,
+                        "response_mime_type": "application/json"
+                    }
+                }
+                if base64_image:
+                    gemini_payload["contents"][0]["parts"].append({
+                        "inline_data": {
+                            "mime_type": "image/jpeg",
+                            "data": base64_image
+                        }
+                    })
+                
+                resp = requests.post(gemini_url, json=gemini_payload, timeout=60)
+                resp.raise_for_status()
+                gemini_resp = resp.json()
+                response_text = gemini_resp["candidates"][0]["content"]["parts"][0]["text"].strip()
+                
+                # Clean markdown if present
+                if response_text.startswith("```json"):
+                    response_text = response_text[7:-3].strip()
+                elif response_text.startswith("```"):
+                    response_text = response_text[3:-3].strip()
+                    
+                return json.loads(response_text)
+                
+            except Exception as gemini_e:
+                logger.warning(f"Gemini API fallback failed: {gemini_e}. Using static fallback.")
+                
             if task_type == "health":
                 return {
                     "diseaseDetection": {

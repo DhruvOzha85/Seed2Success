@@ -9,7 +9,7 @@ def get_seasonal_weather(lat: float, lon: float) -> dict:
     Fetches the last 90 days of weather to approximate the current season.
     # ponytail: naive heuristic. Upgrade path: use actual historical season averages
     """
-    end_date = datetime.date.today()
+    end_date = datetime.date.today() - datetime.timedelta(days=6)
     start_date = end_date - datetime.timedelta(days=90)
     
     url = "https://archive-api.open-meteo.com/v1/archive"

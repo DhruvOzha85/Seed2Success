@@ -10,7 +10,7 @@ logger = logging.getLogger("vision_api")
 router = APIRouter()
 
 OLLAMA_URL = "http://localhost:11434/v1/chat/completions" # Ollama's OpenAI compatible endpoint
-OLLAMA_MODEL = "llava"
+OLLAMA_MODEL = "minicpm-v"
 
 @router.post("/analyze")
 async def analyze_vision(

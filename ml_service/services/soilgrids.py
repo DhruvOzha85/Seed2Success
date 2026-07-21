@@ -31,16 +31,17 @@ def get_soil_properties(lat: float, lon: float, state: str = None, district: str
     }
     
     try:
-        # Reduced timeout since the API hangs frequently
-        resp = requests.get(url, params=params, timeout=2)
+        # Increased timeout to 10s because SoilGrids API can be slow
+        resp = requests.get(url, params=params, timeout=10)
         resp.raise_for_status()
         data = resp.json()
         
         props = {}
         for layer in data.get("properties", {}).get("layers", []):
             name = layer["name"]
-            val = layer["depths"][0]["values"]["mean"]
-            props[name] = val
+            val = layer["depths"][0]["values"].get("mean")
+            if val is not None:
+                props[name] = val
             
         return {
             "ph": props.get("phh2o", 70) / 10.0,

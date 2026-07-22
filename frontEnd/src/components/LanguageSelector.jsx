@@ -8,6 +8,7 @@ const LANGUAGES = [
   { code: "mr", label: "Marathi", native: "मराठी", gtCode: "mr" },
   { code: "ta", label: "Tamil", native: "தமிழ்", gtCode: "ta" },
   { code: "kn", label: "Kannada", native: "ಕನ್ನಡ", gtCode: "kn" },
+  { code: "gu", label: "Gujarati", native: "ગુજરાતી", gtCode: "gu" },
 ];
 
 function getCookie(name) {
